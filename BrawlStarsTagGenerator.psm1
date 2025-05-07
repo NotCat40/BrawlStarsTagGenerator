@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-Converts between numeric IDs and hashtag codes used in games like Clash of Clans.
+Converts between numeric IDs and hashtag codes used in Brawl Stars.
 
 .DESCRIPTION
 Provides functions to convert between numeric IDs and string codes in the format "#XXXXXX".
