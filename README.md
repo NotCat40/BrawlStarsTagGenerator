@@ -15,7 +15,7 @@ Install-Module -Name BrawlCodeGenerator -Force
 ## Examples
 ```powershell
 # Convert ID to tag
-ConvertTo-LogicLongCode -Id 3056576
+ConvertTo-LogicLongCode -Id 3056576 -LowId 15
 
 # Convert tag to ID
 ConvertFrom-LogicLongCode -Code "#QYUURGGQ"
