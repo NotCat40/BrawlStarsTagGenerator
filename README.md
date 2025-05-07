@@ -3,7 +3,11 @@
 PowerShell module for converting between numeric player IDs and hashtag codes in Brawl Stars.
 
 ## Execution Policy
-Type `Set-ExecutionPolicy Bypass` for normal installation
+
+To install this module, you may need to temporarily relax PowerShell's execution policy:
+```powershell
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
 
 ## Features
 - Convert player ID to game tag (e.g. `#QYUURGGQ`)
