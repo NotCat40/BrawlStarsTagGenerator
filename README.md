@@ -1,13 +1,6 @@
-# BrawlCodeGenerator
+# BrawlStarsTagGenerator
 
 PowerShell module for converting between numeric player IDs and hashtag codes in Brawl Stars.
-
-## Execution Policy
-
-To install this module, you may need to temporarily relax PowerShell's execution policy:
-```powershell
-Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
 
 ## Features
 - Convert player ID to game tag (e.g. `#QYUURGGQ`)
@@ -20,7 +13,7 @@ Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
    - For all users: `C:\Program Files\WindowsPowerShell\Modules\`
    - For current user: `C:\Users\username\Documents\WindowsPowerShell\Modules\`
 3. The extracted folder should be named `BrawlCodeGenerator` (containing the .psm1 file)
-4. Verify installation by running: `Get-Module -ListAvailable BrawlCodeGenerator`
+4. Verify installation by running: `Get-Module -ListAvailable BrawlStarsTagGenerator`
 
 ## Examples
 ```powershell
@@ -35,5 +28,5 @@ ConvertFrom-LogicLongCode -Code "#QYUURGGQ"
 - PowerShell 5.1 or newer
 
 ## Notes
-- You may need to run `Import-Module BrawlCodeGenerator` after installation
+- You may need to run `Import-Module BrawlStarsTagGenerator` after installation
 - If you get execution policy errors, run: `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser`
