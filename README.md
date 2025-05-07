@@ -7,11 +7,6 @@ PowerShell module for converting between numeric player IDs and hashtag codes in
 - Convert game tag back to player ID
 - Supports both 32-bit and 64-bit ID formats
 
-## Installation
-```powershell
-Install-Module -Name BrawlCodeGenerator -Force
-```
-
 ## Examples
 ```powershell
 # Convert ID to tag
