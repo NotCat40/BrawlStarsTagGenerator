@@ -15,11 +15,16 @@ ConvertFrom-LogicLongCode -Code "#QYUURGGQ"
 Returns LogicLong object with High=15, Low=3056576
 #>
 
-class LogicLong {
-    [long]$High
-    [long]$Low
+<#
+.SYNOPSIS
+Converts between numeric IDs and hashtag codes used in Brawl Stars.
+#>
 
-    LogicLong([long]$high, [long]$low) {
+class LogicLong {
+    [int]$High
+    [int]$Low
+
+    LogicLong([int]$high, [int]$low) {
         $this.High = $high
         $this.Low = $low
     }
@@ -30,44 +35,36 @@ class LogicLong {
 }
 
 function ConvertTo-LogicLongCode {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='ByLogicLong')]
     param(
-        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+        [Parameter(Mandatory=$true, ParameterSetName='ByLogicLong')]
+        [long]$LogicLong,
+        
+        [Parameter(Mandatory=$true, ParameterSetName='ByParts')]
         [long]$Id,
-        [long]$HighId = 0,
-        [switch]$Use64Bit
+        
+        [Parameter(ParameterSetName='ByParts')]
+        [int]$HighId = 0
     )
 
-    begin {
-        $CONVERSION_CHARS = "0289PYLQGRJCUV"
-        $HASHTAG = "#"
-    }
+    $CONVERSION_CHARS = "0289PYLQGRJCUV"
+    $HASHTAG = "#"
 
-    process {
-        try {
-            if ($Use64Bit) {
-                # Full 64-bit conversion
-                $code = $HASHTAG + (ConvertTo-InternalCode -Value $Id -Chars $CONVERSION_CHARS)
-                return $code
-            }
-            else {
-                # Traditional 32-bit compatible conversion
-                if ($HighId -ne 0) {
-                    # Если задана High-часть, объединяем с Low по оригинальной логике
-                    $combinedValue = ($Id -shl 8) -bor ($HighId -band 0xFF)
-                    $code = $HASHTAG + (ConvertTo-InternalCode -Value $combinedValue -Chars $CONVERSION_CHARS)
-                    return $code
-                }
-                else {
-                    # Если HighId = 0, работаем только с Low-частью
-                    $code = $HASHTAG + (ConvertTo-InternalCode -Value $Id -Chars $CONVERSION_CHARS)
-                    return $code
-                }
-            }
+    if ($PSCmdlet.ParameterSetName -eq 'ByParts') {
+        if ($HighId -lt 256) {
+            $value = ($Id -shl 8) -bor $HighId
+            return $HASHTAG + (ConvertTo-Base -Value $value -Chars $CONVERSION_CHARS)
         }
-        catch {
-            Write-Error "Error converting ID to code: $_"
+        return $null
+    }
+    else {
+        $highValue = ($LogicLong -shr 32) -band 0xFFFFFFFF
+        if ($highValue -lt 256) {
+            $lowerInt = $LogicLong -band 0xFFFFFFFF
+            $value = ($lowerInt -shl 8) -bor $highValue
+            return $HASHTAG + (ConvertTo-Base -Value $value -Chars $CONVERSION_CHARS)
         }
+        return $null
     }
 }
 
@@ -78,62 +75,37 @@ function ConvertFrom-LogicLongCode {
         [string]$Code
     )
 
-    begin {
-        $CONVERSION_CHARS = "0289PYLQGRJCUV"
-    }
+    $CONVERSION_CHARS = "0289PYLQGRJCUV"
 
-    process {
-        try {
-            if (-not $Code.StartsWith('#')) {
-                throw "Code must start with '#'"
-            }
+    if ($Code.Length -lt 14) {
+        $idCode = $Code.Substring(1)
+        $id = ConvertFrom-Base -Code $idCode -Chars $CONVERSION_CHARS
 
-            if ($Code.Length -gt 13) {
-                throw "Code too long. Maximum length is 12 characters (excluding #)"
-            }
-
-            $idCode = $Code.Substring(1)
-            $id = ConvertFrom-InternalCode -Code $idCode -Chars $CONVERSION_CHARS
-
-            if ($id -eq -1) {
-                throw "Invalid characters in code"
-            }
-
-            # Check if this is a traditional 32-bit compatible code
-            if ($id -lt [math]::Pow(2, 40)) {
-                $high = $id -band 0xFF
-                $low = $id -shr 8
-                return [LogicLong]::new($high, $low)
-            }
-            else {
-                # Full 64-bit ID
-                $high = $id -shr 32
-                $low = $id -band 0xFFFFFFFF
-                return [LogicLong]::new($high, $low)
-            }
-        }
-        catch {
-            Write-Error "Error converting code to ID: $_"
-            return [LogicLong]::new(-1, -1)
+        if ($id -ne -1) {
+            $high = $id % 256
+            $low = ($id -shr 8) -band 0x7FFFFFFF
+            return [LogicLong]::new($high, $low)
         }
     }
+    else {
+        Write-Warning "Cannot convert the string to code. String is too long."
+    }
+
+    return [LogicLong]::new(-1, -1)
 }
 
-# Internal helper functions
-function ConvertTo-InternalCode {
+function ConvertTo-Base {
     param(
         [long]$Value,
         [string]$Chars
     )
 
-    if ($Value -lt 0) { return $null }
-
     $code = New-Object char[] 12
-    $charsCount = $Chars.Length
+    $conversionCharsCount = $Chars.Length
 
     for ($i = 11; $i -ge 0; $i--) {
-        $code[$i] = $Chars[[int]($Value % $charsCount)]
-        $Value = [Math]::Floor($Value / $charsCount)
+        $code[$i] = $Chars[$Value % $conversionCharsCount]
+        $Value = [Math]::Floor($Value / $conversionCharsCount)
 
         if ($Value -eq 0) {
             return [string]::new($code, $i, 12 - $i)
@@ -143,26 +115,27 @@ function ConvertTo-InternalCode {
     return [string]::new($code)
 }
 
-function ConvertFrom-InternalCode {
+function ConvertFrom-Base {
     param(
         [string]$Code,
         [string]$Chars
     )
 
     $id = 0
-    $charsCount = $Chars.Length
-    $codeLength = $Code.Length
+    $conversionCharsCount = $Chars.Length
+    $codeCharsCount = $Code.Length
 
-    for ($i = 0; $i -lt $codeLength; $i++) {
+    for ($i = 0; $i -lt $codeCharsCount; $i++) {
         $charIndex = $Chars.IndexOf($Code[$i])
 
         if ($charIndex -eq -1) {
             return -1
         }
 
-        $id = $id * $charsCount + $charIndex
+        $id = $id * $conversionCharsCount + $charIndex
     }
 
     return $id
 }
+
 Export-ModuleMember -Function ConvertFrom-LogicLongCode, ConvertTo-LogicLongCode
