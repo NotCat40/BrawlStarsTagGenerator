@@ -2,7 +2,7 @@
 
 PowerShell module for converting between numeric player IDs and hashtag codes in Brawl Stars.
 
-## Bypass
+## Execution Policy
 Type `Set-ExecutionPolicy Bypass` for normal installation
 
 ## Features
