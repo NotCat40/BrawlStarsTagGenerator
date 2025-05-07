@@ -12,7 +12,7 @@ PowerShell module for converting between numeric player IDs and hashtag codes in
 2. Extract the contents to one of your PowerShell modules folders:
    - For all users: `C:\Program Files\WindowsPowerShell\Modules\`
    - For current user: `C:\Users\username\Documents\WindowsPowerShell\Modules\`
-3. The extracted folder should be named `BrawlCodeGenerator` (containing the .psm1 file)
+3. The extracted folder should be named `BrawlStarsTagGenerator` (containing the .psm1 file)
 4. Verify installation by running: `Get-Module -ListAvailable BrawlStarsTagGenerator`
 
 ## Examples
