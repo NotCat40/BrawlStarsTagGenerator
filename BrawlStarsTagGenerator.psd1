@@ -12,7 +12,8 @@
     PrivateData       = @{
         PSData = @{
             LicenseUri = "https://opensource.org/licenses/MIT"
-            ProjectUri = "https://github.com/NotCat40/BrawlCodeGenerator"
+            ProjectUri = "https://github.com/NotCat40/BrawlStarsTagGenerator"
         }
     }
 }
+
